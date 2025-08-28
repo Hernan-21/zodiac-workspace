@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AstroMystic - Dashboard Astrológico</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Animate.css Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         :root {
             --primaryColor: #14d5c2;
@@ -39,9 +43,10 @@
             top: 0;
             width: 320px;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            background: transparent;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-right: none;
             z-index: 1000;
             padding: 2rem 0;
             overflow-y: auto;
@@ -70,11 +75,23 @@
         .nav-categories {
             padding: 2rem 1rem;
             height: calc(100vh - 200px);
-            overflow-y: auto;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: center;
             position: relative;
+        }
+
+        .categories-carousel {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transform-style: preserve-3d;
+            perspective: 1000px;
         }
 
         .category-item {
@@ -84,32 +101,89 @@
             margin-bottom: 0.8rem;
             border-radius: 20px;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
             color: rgba(255, 255, 255, 0.5);
-            position: relative;
+            position: absolute;
             overflow: hidden;
             font-size: 0.95rem;
-            opacity: 0.7;
-            transform: scale(0.95);
+            width: 80%;
+            transform-origin: center;
+            opacity: 0.3;
+            transform: translateY(0) scale(0.8);
+            background: transparent;
+            border: none;
+            z-index: 1;
         }
 
-        .category-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: scale(0.98) translateX(8px);
+        .category-item.center {
+            opacity: 1;
+            transform: translateY(0) scale(1.1);
+            z-index: 10;
+            background: rgba(138, 43, 226, 0.2);
+            text-shadow: 0 0 25px rgba(138, 43, 226, 1);
+        }
+
+        .category-item.above {
+            opacity: 0.6;
+            transform: translateY(-80px) scale(0.9);
+            z-index: 5;
+        }
+
+        .category-item.below {
+            opacity: 0.6;
+            transform: translateY(80px) scale(0.9);
+            z-index: 5;
+        }
+
+        .category-item.far-above {
+            opacity: 0.2;
+            transform: translateY(-160px) scale(0.7);
+            z-index: 2;
+        }
+
+        .category-item.far-below {
+            opacity: 0.2;
+            transform: translateY(160px) scale(0.7);
+            z-index: 2;
+        }
+
+        .category-item.hidden {
+            opacity: 0;
+            transform: translateY(-240px) scale(0.5);
+            z-index: 1;
+        }
+
+        .category-item.center:hover {
+            background: rgba(138, 43, 226, 0.1);
+            transform: translateX(15px) scale(1.05);
             color: rgba(255, 255, 255, 0.8);
             opacity: 0.9;
+            text-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
+        }
+        
+        .category-item.center:hover i {
+            transform: scale(1.2) rotate(10deg);
+            color: #8a2be2;
+            filter: drop-shadow(0 0 10px rgba(138, 43, 226, 0.8));
         }
 
         .category-item.active {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%);
+            background: rgba(138, 43, 226, 0.2);
             backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: none;
             color: white;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
-            transform: scale(1.05) translateX(15px);
+            box-shadow: none;
+            transform: translateX(20px) scale(1.08);
             opacity: 1;
             font-size: 1.1rem;
             font-weight: 600;
+            text-shadow: 0 0 25px rgba(138, 43, 226, 1);
+        }
+        
+        .category-item.active i {
+            color: #8a2be2;
+            transform: scale(1.3);
+            filter: drop-shadow(0 0 15px rgba(138, 43, 226, 1));
         }
 
         .category-item.active::before {
@@ -171,6 +245,7 @@
             min-height: 100vh;
             padding: 3rem;
             position: relative;
+            animation: fadeInUp 1s ease-out;
         }
 
         .content-header {
@@ -184,6 +259,7 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             margin-bottom: 1rem;
             transition: all 0.3s ease;
+            animation: fadeInDown 1.2s ease-out;
         }
 
         .content-subtitle {
@@ -191,6 +267,7 @@
             color: rgba(255, 255, 255, 0.9);
             max-width: 600px;
             transition: all 0.3s ease;
+            animation: fadeInUp 1.4s ease-out;
         }
 
         #dynamic-content {
@@ -247,6 +324,7 @@
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             gap: 1.5rem;
             margin-top: 2rem;
+            animation: fadeIn 1.6s ease-out;
         }
 
         .zodiac-sign {
@@ -255,14 +333,22 @@
             padding: 1.5rem 1rem;
             border-radius: 15px;
             text-align: center;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            transform: translateY(0);
         }
 
         .zodiac-sign:hover {
             background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-5px);
+            transform: translateY(-15px) scale(1.08) rotateY(5deg);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .zodiac-sign:hover i {
+            transform: scale(1.2) rotate(10deg);
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.8));
         }
 
         .zodiac-sign i {
@@ -337,6 +423,38 @@
             background: linear-gradient(135deg, var(--primaryColor) 0%, var(--secondaryColor) 100%);
         }
 
+        /* Animation Keyframes */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
@@ -364,35 +482,37 @@
 <body>
     <!-- Sidebar Dashboard -->
     <div class="sidebar">
-        <div class="logo">
+        <div class="logo" data-aos="fade-down" data-aos-delay="100">
             <h1><i class="fas fa-moon"></i> AstroMystic</h1>
             <p><i class="fas fa-sparkles"></i> Tu guía astrológica personal</p>
         </div>
 
         <nav class="nav-categories">
-            <div class="category-item active" data-category="horoscope">
-                <i class="fas fa-calendar-alt"></i>
-                <span>Horóscopos Diarios</span>
-            </div>
-            <div class="category-item" data-category="natal">
-                <i class="fas fa-chart-pie"></i>
-                <span>Carta Natal</span>
-            </div>
-            <div class="category-item" data-category="compatibility">
-                <i class="fas fa-heart"></i>
-                <span>Compatibilidad</span>
-            </div>
-            <div class="category-item" data-category="tarot">
-                <i class="fas fa-crystal-ball"></i>
-                <span>Tarot Astrológico</span>
-            </div>
-            <div class="category-item" data-category="transits">
-                <i class="fas fa-globe"></i>
-                <span>Tránsitos Planetarios</span>
-            </div>
-            <div class="category-item" data-category="palmistry">
-                <i class="fas fa-hand-paper"></i>
-                <span>Quiromancia</span>
+            <div class="categories-carousel">
+                <div class="category-item center active" data-category="horoscope" data-index="0">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Horóscopos Diarios</span>
+                </div>
+                <div class="category-item above" data-category="natal" data-index="1">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Carta Natal</span>
+                </div>
+                <div class="category-item below" data-category="compatibility" data-index="2">
+                    <i class="fas fa-heart"></i>
+                    <span>Compatibilidad</span>
+                </div>
+                <div class="category-item far-above" data-category="tarot" data-index="3">
+                    <i class="fas fa-crystal-ball"></i>
+                    <span>Tarot Astrológico</span>
+                </div>
+                <div class="category-item far-below" data-category="transits" data-index="4">
+                    <i class="fas fa-globe"></i>
+                    <span>Tránsitos Planetarios</span>
+                </div>
+                <div class="category-item hidden" data-category="palmistry" data-index="5">
+                    <i class="fas fa-hand-paper"></i>
+                    <span>Quiromancia</span>
+                </div>
             </div>
         </nav>
     </div>
@@ -400,70 +520,70 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="content-header">
-            <h1 class="content-title" id="content-title">Horóscopos Diarios</h1>
-            <p class="content-subtitle" id="content-subtitle">Descubre lo que las estrellas tienen preparado para ti hoy</p>
+            <h1 class="content-title" id="content-title" data-aos="zoom-in" data-aos-delay="600">Horóscopos Diarios</h1>
+            <p class="content-subtitle" id="content-subtitle" data-aos="fade-up" data-aos-delay="700">Descubre lo que las estrellas tienen preparado para ti hoy</p>
         </div>
 
         <!-- Dynamic Content Area -->
         <div id="dynamic-content">
             <!-- Horoscope Content (Default) -->
             <div class="zodiac-grid">
-                <div class="zodiac-sign" data-sign="aries">
+                <div class="zodiac-sign" data-sign="aries" data-aos="flip-left" data-aos-delay="800">
                     <i class="fas fa-fire"></i>
                     <h4>Aries</h4>
                     <p>21 Mar - 19 Abr</p>
                 </div>
-                <div class="zodiac-sign" data-sign="tauro">
+                <div class="zodiac-sign" data-sign="tauro" data-aos="flip-left" data-aos-delay="850">
                     <i class="fas fa-mountain"></i>
                     <h4>Tauro</h4>
                     <p>20 Abr - 20 May</p>
                 </div>
-                <div class="zodiac-sign" data-sign="geminis">
+                <div class="zodiac-sign" data-sign="geminis" data-aos="flip-left" data-aos-delay="900">
                     <i class="fas fa-comments"></i>
                     <h4>Géminis</h4>
                     <p>21 May - 20 Jun</p>
                 </div>
-                <div class="zodiac-sign" data-sign="cancer">
+                <div class="zodiac-sign" data-sign="cancer" data-aos="flip-left" data-aos-delay="950">
                     <i class="fas fa-home"></i>
                     <h4>Cáncer</h4>
                     <p>21 Jun - 22 Jul</p>
                 </div>
-                <div class="zodiac-sign" data-sign="leo">
+                <div class="zodiac-sign" data-sign="leo" data-aos="flip-left" data-aos-delay="1000">
                     <i class="fas fa-crown"></i>
                     <h4>Leo</h4>
                     <p>23 Jul - 22 Ago</p>
                 </div>
-                <div class="zodiac-sign" data-sign="virgo">
+                <div class="zodiac-sign" data-sign="virgo" data-aos="flip-left" data-aos-delay="1050">
                     <i class="fas fa-leaf"></i>
                     <h4>Virgo</h4>
                     <p>23 Ago - 22 Sep</p>
                 </div>
-                <div class="zodiac-sign" data-sign="libra">
+                <div class="zodiac-sign" data-sign="libra" data-aos="flip-left" data-aos-delay="1100">
                     <i class="fas fa-balance-scale"></i>
                     <h4>Libra</h4>
                     <p>23 Sep - 22 Oct</p>
                 </div>
-                <div class="zodiac-sign" data-sign="escorpio">
+                <div class="zodiac-sign" data-sign="escorpio" data-aos="flip-left" data-aos-delay="1150">
                     <i class="fas fa-spider"></i>
                     <h4>Escorpio</h4>
                     <p>23 Oct - 21 Nov</p>
                 </div>
-                <div class="zodiac-sign" data-sign="sagitario">
+                <div class="zodiac-sign" data-sign="sagitario" data-aos="flip-left" data-aos-delay="1200">
                     <i class="fas fa-bullseye"></i>
                     <h4>Sagitario</h4>
                     <p>22 Nov - 21 Dic</p>
                 </div>
-                <div class="zodiac-sign" data-sign="capricornio">
+                <div class="zodiac-sign" data-sign="capricornio" data-aos="flip-left" data-aos-delay="1250">
                     <i class="fas fa-chess-king"></i>
                     <h4>Capricornio</h4>
                     <p>22 Dic - 19 Ene</p>
                 </div>
-                <div class="zodiac-sign" data-sign="acuario">
+                <div class="zodiac-sign" data-sign="acuario" data-aos="flip-left" data-aos-delay="1300">
                     <i class="fas fa-tint"></i>
                     <h4>Acuario</h4>
                     <p>20 Ene - 18 Feb</p>
                 </div>
-                <div class="zodiac-sign" data-sign="piscis">
+                <div class="zodiac-sign" data-sign="piscis" data-aos="flip-left" data-aos-delay="1350">
                     <i class="fas fa-fish"></i>
                     <h4>Piscis</h4>
                     <p>19 Feb - 20 Mar</p>
@@ -692,7 +812,7 @@
             }
         };
 
-        // Category navigation functionality with Netflix-like behavior
+        // Infinite Carousel functionality
          document.addEventListener('DOMContentLoaded', function() {
              const categoryItems = document.querySelectorAll('.category-item');
              const contentTitle = document.getElementById('content-title');
@@ -700,111 +820,140 @@
              const dynamicContent = document.getElementById('dynamic-content');
              const navCategories = document.querySelector('.nav-categories');
              const body = document.body;
-
-             // Function to center the active category
-             function centerActiveCategory(activeItem) {
-                 const containerHeight = navCategories.clientHeight;
-                 const itemHeight = activeItem.offsetHeight;
-                 const itemTop = activeItem.offsetTop;
-                 const scrollTop = itemTop - (containerHeight / 2) + (itemHeight / 2);
-                 
-                 navCategories.scrollTo({
-                     top: scrollTop,
-                     behavior: 'smooth'
-                 });
-             }
-
-             // Function to update category states based on scroll position
-             function updateCategoryStates() {
-                 const containerRect = navCategories.getBoundingClientRect();
-                 const containerCenter = containerRect.top + containerRect.height / 2;
-                 
-                 let closestItem = null;
-                 let closestDistance = Infinity;
-                 
-                 categoryItems.forEach(item => {
-                     const itemRect = item.getBoundingClientRect();
-                     const itemCenter = itemRect.top + itemRect.height / 2;
-                     const distance = Math.abs(itemCenter - containerCenter);
+             
+             let currentIndex = 0;
+             const totalItems = categoryItems.length;
+             
+             // Position classes for carousel
+             const positionClasses = ['center', 'above', 'below', 'far-above', 'far-below', 'hidden'];
+             
+             function updateCarousel() {
+                 categoryItems.forEach((item, index) => {
+                     // Remove all position classes
+                     item.classList.remove(...positionClasses, 'active');
                      
-                     // Calculate opacity based on distance from center
-                     const maxDistance = containerRect.height / 2;
-                     const opacity = Math.max(0.3, 1 - (distance / maxDistance));
-                     const scale = Math.max(0.9, 1 - (distance / maxDistance) * 0.1);
+                     // Calculate relative position
+                     let relativePos = (index - currentIndex + totalItems) % totalItems;
                      
-                     item.style.opacity = opacity;
-                     
-                     if (!item.classList.contains('active')) {
-                         item.style.transform = `scale(${scale})`;
-                     }
-                     
-                     if (distance < closestDistance) {
-                         closestDistance = distance;
-                         closestItem = item;
+                     // Assign position class based on relative position
+                     if (relativePos === 0) {
+                         item.classList.add('center', 'active');
+                     } else if (relativePos === 1 || relativePos === totalItems - 1) {
+                         item.classList.add(relativePos === 1 ? 'below' : 'above');
+                     } else if (relativePos === 2 || relativePos === totalItems - 2) {
+                         item.classList.add(relativePos === 2 ? 'far-below' : 'far-above');
+                     } else {
+                         item.classList.add('hidden');
                      }
                  });
              }
-
-             // Scroll event listener for dynamic effects
-             navCategories.addEventListener('scroll', updateCategoryStates);
-
-             categoryItems.forEach(item => {
+             
+             function selectCategory(index) {
+                  currentIndex = index;
+                  updateCarousel();
+                  
+                  const activeItem = categoryItems[currentIndex];
+                  const category = activeItem.getAttribute('data-category');
+                  
+                  const titles = {
+                      'horoscope': 'Horóscopos Diarios',
+                      'natal': 'Carta Natal Personalizada',
+                      'compatibility': 'Compatibilidad Amorosa',
+                      'tarot': 'Tarot Astrológico',
+                      'transits': 'Tránsitos Planetarios',
+                      'palmistry': 'Quiromancia Profesional'
+                  };
+                  
+                  const subtitles = {
+                      'horoscope': 'Descubre lo que las estrellas tienen preparado para ti hoy',
+                      'natal': 'Conoce tu personalidad y destino a través de tu carta astral',
+                      'compatibility': 'Descubre tu compatibilidad amorosa con otros signos',
+                      'tarot': 'Consulta las cartas para obtener guía espiritual',
+                      'transits': 'Comprende cómo los planetas influyen en tu vida actual',
+                      'palmistry': 'Lee las líneas de tu mano para conocer tu futuro'
+                  };
+                  
+                  // Update titles with fade effect
+                  contentTitle.style.opacity = '0';
+                  contentSubtitle.style.opacity = '0';
+                  
+                  setTimeout(() => {
+                      contentTitle.textContent = titles[category];
+                      contentSubtitle.textContent = subtitles[category];
+                      contentTitle.style.opacity = '1';
+                      contentSubtitle.style.opacity = '1';
+                  }, 150);
+                  
+                  // Update content with enhanced fade effect
+                  dynamicContent.classList.add('animate__animated', 'animate__fadeOut');
+                  
+                  setTimeout(() => {
+                      dynamicContent.innerHTML = categoryContent[category].content;
+                      
+                      // Change background
+                      body.className = '';
+                      body.className = `bg-${category}`;
+                      
+                      // Enhanced fade in animation
+                      dynamicContent.classList.remove('animate__fadeOut');
+                      dynamicContent.classList.add('animate__fadeInUp');
+                      
+                      // Reinitialize AOS for new content
+                      AOS.refresh();
+                      
+                      // Add click functionality to zodiac signs if they exist
+                      const zodiacSigns = document.querySelectorAll('.zodiac-sign');
+                      zodiacSigns.forEach(sign => {
+                          sign.addEventListener('click', function() {
+                              const signName = this.querySelector('h4').textContent;
+                              alert(`Horóscopo para ${signName}: Las estrellas te sonríen hoy. Es un buen momento para nuevos comienzos y decisiones importantes.`);
+                          });
+                      });
+                  }, 400);
+              }
+             
+             // Add click event listeners
+             categoryItems.forEach((item, index) => {
                  item.addEventListener('click', function() {
-                     // Remove active class from all items
-                     categoryItems.forEach(cat => {
-                         cat.classList.remove('active');
-                         cat.style.transform = 'scale(0.95)';
-                     });
-                     
-                     // Add active class to clicked item
-                     this.classList.add('active');
-                     
-                     // Center the active category with smooth scroll
-                     setTimeout(() => {
-                         centerActiveCategory(this);
-                     }, 100);
-                     
-                     // Get category data
-                     const category = this.getAttribute('data-category');
-                     const content = categoryContent[category];
-                     
-                     // Update content with fade effect
-                     dynamicContent.style.opacity = '0';
-                     
-                     setTimeout(() => {
-                         contentTitle.textContent = content.title;
-                         contentSubtitle.textContent = content.subtitle;
-                         dynamicContent.innerHTML = content.content;
-                         
-                         // Change background
-                         body.className = `bg-${category}`;
-                         
-                         // Fade content back in
-                         dynamicContent.style.opacity = '1';
-                         
-                         // Add click functionality to zodiac signs if they exist
-                         const zodiacSigns = document.querySelectorAll('.zodiac-sign');
-                         zodiacSigns.forEach(sign => {
-                             sign.addEventListener('click', function() {
-                                 const signName = this.querySelector('h4').textContent;
-                                 alert(`Horóscopo para ${signName}: Las estrellas te sonríen hoy. Es un buen momento para nuevos comienzos y decisiones importantes.`);
-                             });
-                         });
-                     }, 200);
+                     selectCategory(index);
                  });
+             });
+             
+             // Add keyboard navigation
+             document.addEventListener('keydown', (e) => {
+                 if (e.key === 'ArrowUp') {
+                     e.preventDefault();
+                     currentIndex = (currentIndex - 1 + totalItems) % totalItems;
+                     selectCategory(currentIndex);
+                 } else if (e.key === 'ArrowDown') {
+                     e.preventDefault();
+                     currentIndex = (currentIndex + 1) % totalItems;
+                     selectCategory(currentIndex);
+                 }
+             });
+             
+             // Add mouse wheel navigation
+             const carousel = document.querySelector('.categories-carousel');
+             carousel.addEventListener('wheel', (e) => {
+                 e.preventDefault();
+                 if (e.deltaY > 0) {
+                     currentIndex = (currentIndex + 1) % totalItems;
+                 } else {
+                     currentIndex = (currentIndex - 1 + totalItems) % totalItems;
+                 }
+                 selectCategory(currentIndex);
+             });
+             
+             // Initialize carousel
+             updateCarousel();
 
-                 // Add hover effects for better UX
-                 item.addEventListener('mouseenter', function() {
-                     if (!this.classList.contains('active')) {
-                         this.style.transform = 'scale(0.98) translateX(8px)';
-                     }
-                 });
-
-                 item.addEventListener('mouseleave', function() {
-                     if (!this.classList.contains('active')) {
-                         this.style.transform = 'scale(0.95)';
-                     }
-                 });
+             // Initialize AOS
+             AOS.init({
+                 duration: 1000,
+                 easing: 'ease-out-cubic',
+                 once: false,
+                 offset: 50,
+                 delay: 100
              });
 
              // Initialize the first category as centered
@@ -826,5 +975,8 @@
              });
          });
     </script>
+    
+    <!-- AOS JavaScript Library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 </body>
 </html>
